@@ -1,70 +1,40 @@
-# Getting Started with Create React App
+## ✈️ Airline Check-In System
+A **React + Redux** application for managing airline check-in, in-flight services, and ancillary services.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+---
 
-## Available Scripts
+## 📌 Features
+### ✅ Airline Staff
+- **Flight Selection:** Choose a flight from the available list.
+- **Seat Map View:** Displays seats with check-in status.
+- **Passenger Management:** View passengers, check-in, undo check-in.
+- **Filters:** Show passengers with wheelchairs, infants, or special requests.
+- **Seat Change:** Reassign passenger seats.
 
-In the project directory, you can run:
+### ✅ In-Flight Services
+- **View Special Meal Requests.**
+- **Add Ancillary Services (extra baggage, priority boarding, etc.).**
+- **Modify Meal Preferences.**
+- **In-Flight Shopping Requests.**
 
-### `npm start`
+### ✅ Admin Dashboard
+- **Manage Passengers:** Add, update, and delete passengers.
+- **Manage Ancillary Services:** Add, update, and delete services per flight.
+- **Passenger Filters:** Identify missing passport/address/DOB.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### ✅ Non-Functional Features
+- **Material UI** for a modern UI.
+- **SCSS Styling** for responsive design.
+- **Redux State Management** for seamless data flow.
+- **Lazy Loading** for performance optimization.
+- **Google OAuth (Optional)** for authentication.
+- **WCAG 2.0 Accessibility & SEO Best Practices.**
+- **Unit Testing** using Jest & React Testing Library.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 🚀 Installation
+### 1️⃣ Clone the Repository
+```sh
+git clone https://github.com/your-repo/airline-checkin.git
+cd airline-checkin
