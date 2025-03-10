@@ -1,25 +1,37 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { lazy, Suspense } from 'react';
+import { Provider } from 'react-redux';
+import store from './Store';
+// import Auth from './components/Auth';
+import AdminDashboard from './components/AdminDashboard';
+import { ThemeProvider, createTheme, CssBaseline, Container, Typography } from '@mui/material';
 
-function App() {
+const FlightList = lazy(() => import('./components/FlightList'));
+const SeatMap = lazy(() => import('./components/SeatMap'));
+
+const theme = createTheme({
+  palette: {
+    primary: { main: '#1976d2' },
+    secondary: { main: '#dc004e' },
+  },
+});
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Provider store={store}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Container maxWidth="md">
+          <Typography variant="h4" align="center" gutterBottom>Airline Check-In System</Typography>
+          <Suspense fallback={<Typography align="center">Loading...</Typography>}>
+            {/* <Auth /> */}
+            <AdminDashboard />
+            <FlightList />
+            <SeatMap />
+          </Suspense>
+        </Container>
+      </ThemeProvider>
+    </Provider>
   );
-}
+};
 
 export default App;

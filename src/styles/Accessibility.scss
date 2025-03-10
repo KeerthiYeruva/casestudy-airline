@@ -1,0 +1,11 @@
+button {
+    font-size: 16px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+  }
+  
+  button:focus {
+    outline: 2px solid blue;
+  }
+  
