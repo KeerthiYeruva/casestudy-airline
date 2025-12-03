@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
-import { Provider } from 'react-redux';
+import React, { useState, lazy, Suspense } from 'react';
+import { Provider, useSelector } from 'react-redux';
 import store from './Store';
-import StaffCheckIn from './components/StaffCheckIn';
-import InFlight from './components/InFlight';
-import AdminDashboard from './components/AdminDashboard';
+import Auth from './components/Auth';
 import { 
   ThemeProvider, 
   createTheme, 
@@ -12,12 +10,20 @@ import {
   Toolbar, 
   Typography, 
   Button,
-  Box
+  Box,
+  CircularProgress,
+  Alert
 } from '@mui/material';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import AirlineSeatReclineExtraIcon from '@mui/icons-material/AirlineSeatReclineExtra';
 import SettingsIcon from '@mui/icons-material/Settings';
 import './App.scss';
+import './styles/Accessibility.scss';
+
+// Lazy load components for performance
+const StaffCheckIn = lazy(() => import('./components/StaffCheckIn'));
+const InFlight = lazy(() => import('./components/InFlight'));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 
 const theme = createTheme({
   palette: {
@@ -26,55 +32,99 @@ const theme = createTheme({
   },
 });
 
-const App = () => {
-  const [currentView, setCurrentView] = useState('checkin'); // 'checkin', 'inflight', or 'admin'
+const LoadingFallback = () => (
+  <Box className="loading-container" role="status" aria-live="polite">
+    <CircularProgress aria-label="Loading content" />
+    <Typography variant="body1" sx={{ ml: 2 }}>
+      Loading...
+    </Typography>
+  </Box>
+);
+
+const MainApp = () => {
+  const [currentView, setCurrentView] = useState('checkin');
+  const { isAuthenticated, role } = useSelector((state) => state.auth);
+
+  if (!isAuthenticated) {
+    return <Auth />;
+  }
+
+  // Role-based access control
+  const canAccessAdmin = role === 'admin';
 
   return (
-    <Provider store={store}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Box sx={{ flexGrow: 1 }}>
-          <AppBar position="static">
-            <Toolbar>
-              <FlightTakeoffIcon sx={{ mr: 2 }} />
-              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                Airline Management System
-              </Typography>
-              <Button
-                color="inherit"
-                startIcon={<AirlineSeatReclineExtraIcon />}
-                onClick={() => setCurrentView('checkin')}
-                variant={currentView === 'checkin' ? 'outlined' : 'text'}
-                sx={{ mr: 1 }}
-              >
-                Check-In
-              </Button>
-              <Button
-                color="inherit"
-                startIcon={<FlightTakeoffIcon />}
-                onClick={() => setCurrentView('inflight')}
-                variant={currentView === 'inflight' ? 'outlined' : 'text'}
-                sx={{ mr: 1 }}
-              >
-                In-Flight
-              </Button>
+    <Box sx={{ flexGrow: 1 }}>
+      <a href="#main-content" className="skip-to-main">
+        Skip to main content
+      </a>
+      <AppBar position="static" component="nav" role="navigation">
+        <Toolbar>
+          <FlightTakeoffIcon sx={{ mr: 2 }} aria-hidden="true" />
+          <Typography variant="h6" component="h1" sx={{ flexGrow: 1 }}>
+            Airline Management System
+          </Typography>
+          
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+            <Button
+              color="inherit"
+              startIcon={<AirlineSeatReclineExtraIcon />}
+              onClick={() => setCurrentView('checkin')}
+              variant={currentView === 'checkin' ? 'outlined' : 'text'}
+              aria-label="Navigate to Check-In"
+              aria-current={currentView === 'checkin' ? 'page' : undefined}
+            >
+              Check-In
+            </Button>
+            <Button
+              color="inherit"
+              startIcon={<FlightTakeoffIcon />}
+              onClick={() => setCurrentView('inflight')}
+              variant={currentView === 'inflight' ? 'outlined' : 'text'}
+              aria-label="Navigate to In-Flight"
+              aria-current={currentView === 'inflight' ? 'page' : undefined}
+            >
+              In-Flight
+            </Button>
+            {canAccessAdmin && (
               <Button
                 color="inherit"
                 startIcon={<SettingsIcon />}
                 onClick={() => setCurrentView('admin')}
                 variant={currentView === 'admin' ? 'outlined' : 'text'}
+                aria-label="Navigate to Admin Dashboard"
+                aria-current={currentView === 'admin' ? 'page' : undefined}
               >
                 Admin
               </Button>
-            </Toolbar>
-          </AppBar>
-
-          <Box sx={{ mt: 3, mb: 3 }}>
-            {currentView === 'checkin' && <StaffCheckIn />}
-            {currentView === 'inflight' && <InFlight />}
-            {currentView === 'admin' && <AdminDashboard />}
+            )}
+            <Auth />
           </Box>
-        </Box>
+        </Toolbar>
+      </AppBar>
+
+      <Box component="main" id="main-content" sx={{ mt: 3, mb: 3 }} role="main">
+        {!canAccessAdmin && currentView === 'admin' && (
+          <Alert severity="error" sx={{ m: 2 }}>
+            Access Denied: Admin privileges required. Please switch to Admin role.
+          </Alert>
+        )}
+        
+        <Suspense fallback={<LoadingFallback />}>
+          {currentView === 'checkin' && <StaffCheckIn />}
+          {currentView === 'inflight' && <InFlight />}
+          {currentView === 'admin' && canAccessAdmin && <AdminDashboard />}
+        </Suspense>
+      </Box>
+    </Box>
+  );
+};
+
+const App = () => {
+  return (
+    <Provider store={store}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <MainApp />
       </ThemeProvider>
     </Provider>
   );
