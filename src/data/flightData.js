@@ -45,6 +45,9 @@ export const passengers = [
     ancillaryServices: ['Wheelchair Assistance', 'Priority Boarding'],
     specialMeal: 'Vegetarian',
     bookingReference: 'ABC123',
+    passport: { number: 'US123456789', expiryDate: '2028-05-15', country: 'USA' },
+    address: '123 Main St, New York, NY 10001',
+    dateOfBirth: '1985-03-20',
     shopRequests: []
   },
   { 
@@ -58,6 +61,9 @@ export const passengers = [
     ancillaryServices: ['Extra Baggage', 'Infant Care Kit'],
     specialMeal: 'Regular',
     bookingReference: 'ABC124',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '456 Oak Ave, Los Angeles, CA 90001',
+    dateOfBirth: '1990-07-14',
     shopRequests: [{ item: 'Perfume - Chanel No. 5', quantity: 1, price: 89.99 }]
   },
   { 
@@ -70,7 +76,11 @@ export const passengers = [
     infant: false,
     ancillaryServices: ['Extra Legroom'],
     specialMeal: 'Gluten-Free',
-    bookingReference: 'ABC125'
+    bookingReference: 'ABC125',
+    passport: { number: 'CA987654321', expiryDate: '2027-11-30', country: 'Canada' },
+    address: '',
+    dateOfBirth: '1988-09-10',
+    shopRequests: []
   },
   { 
     id: 'P004', 
@@ -82,7 +92,11 @@ export const passengers = [
     infant: false,
     ancillaryServices: ['Priority Boarding', 'Extra Baggage'],
     specialMeal: 'Vegan',
-    bookingReference: 'ABC126'
+    bookingReference: 'ABC126',
+    passport: { number: 'GB456789123', expiryDate: '2029-02-20', country: 'UK' },
+    address: '789 Pine Rd, Miami, FL 33101',
+    dateOfBirth: '',
+    shopRequests: []
   },
   { 
     id: 'P005', 
@@ -361,4 +375,5 @@ export const shopCategories = [
   'Travel Essentials',
   'Toys & Gifts'
 ];
+
 

@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 import store from './Store';
 import StaffCheckIn from './components/StaffCheckIn';
 import InFlight from './components/InFlight';
+import AdminDashboard from './components/AdminDashboard';
 import { 
   ThemeProvider, 
   createTheme, 
@@ -15,6 +16,7 @@ import {
 } from '@mui/material';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import AirlineSeatReclineExtraIcon from '@mui/icons-material/AirlineSeatReclineExtra';
+import SettingsIcon from '@mui/icons-material/Settings';
 import './App.scss';
 
 const theme = createTheme({
@@ -25,7 +27,7 @@ const theme = createTheme({
 });
 
 const App = () => {
-  const [currentView, setCurrentView] = useState('checkin'); // 'checkin' or 'inflight'
+  const [currentView, setCurrentView] = useState('checkin'); // 'checkin', 'inflight', or 'admin'
 
   return (
     <Provider store={store}>
@@ -52,14 +54,25 @@ const App = () => {
                 startIcon={<FlightTakeoffIcon />}
                 onClick={() => setCurrentView('inflight')}
                 variant={currentView === 'inflight' ? 'outlined' : 'text'}
+                sx={{ mr: 1 }}
               >
                 In-Flight
+              </Button>
+              <Button
+                color="inherit"
+                startIcon={<SettingsIcon />}
+                onClick={() => setCurrentView('admin')}
+                variant={currentView === 'admin' ? 'outlined' : 'text'}
+              >
+                Admin
               </Button>
             </Toolbar>
           </AppBar>
 
           <Box sx={{ mt: 3, mb: 3 }}>
-            {currentView === 'checkin' ? <StaffCheckIn /> : <InFlight />}
+            {currentView === 'checkin' && <StaffCheckIn />}
+            {currentView === 'inflight' && <InFlight />}
+            {currentView === 'admin' && <AdminDashboard />}
           </Box>
         </Box>
       </ThemeProvider>

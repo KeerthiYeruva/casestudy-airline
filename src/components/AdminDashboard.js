@@ -1,69 +1,828 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { addPassenger, updatePassenger, deletePassenger } from '../slices/adminSlice';
-import { Button, Table, TableBody, TableCell, TableHead, TableRow, Typography, Paper, TextField, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import {
+  addPassenger,
+  updatePassenger,
+  deletePassenger,
+  selectFlight,
+  addAncillaryService,
+  updateAncillaryService,
+  deleteAncillaryService,
+  addMealOption,
+  updateMealOption,
+  deleteMealOption,
+  addShopItem,
+  updateShopItem,
+  deleteShopItem,
+  setAdminFilter,
+  clearAdminFilters,
+} from '../slices/adminSlice';
+import {
+  Container,
+  Paper,
+  Typography,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Grid,
+  Box,
+  Tabs,
+  Tab,
+  Chip,
+  IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import PersonIcon from '@mui/icons-material/Person';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 const AdminDashboard = () => {
-  const passengers = useSelector(state => state.admin.passengers);
   const dispatch = useDispatch();
-  
-  const [open, setOpen] = useState(false);
-  const [newPassenger, setNewPassenger] = useState({ name: '', seat: '', services: '' });
+  const { flights, selectedFlight, passengers, ancillaryServices, mealOptions, shopItems, filterOptions } =
+    useSelector((state) => state.admin);
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const [activeTab, setActiveTab] = useState(0);
+  const [passengerDialog, setPassengerDialog] = useState(false);
+  const [serviceDialog, setServiceDialog] = useState(false);
+  const [mealDialog, setMealDialog] = useState(false);
+  const [shopItemDialog, setShopItemDialog] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
-  const handleChange = (e) => {
-    setNewPassenger({ ...newPassenger, [e.target.name]: e.target.value });
+  const [passengerForm, setPassengerForm] = useState({
+    id: '',
+    name: '',
+    seat: '',
+    flightId: '',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    ancillaryServices: [],
+    specialMeal: 'Regular',
+    wheelchair: false,
+    infant: false,
+    checkedIn: false,
+    bookingReference: '',
+    shopRequests: [],
+  });
+
+  const [serviceForm, setServiceForm] = useState('');
+  const [editingService, setEditingService] = useState('');
+  const [mealForm, setMealForm] = useState('');
+  const [editingMeal, setEditingMeal] = useState('');
+  const [shopItemForm, setShopItemForm] = useState({
+    id: '',
+    name: '',
+    category: 'Perfumes & Cosmetics',
+    price: 0,
+    currency: 'USD',
+  });
+
+  // Filter passengers
+  const filteredPassengers = selectedFlight
+    ? passengers.filter((p) => {
+        if (p.flightId !== selectedFlight.id) return false;
+        if (filterOptions.missingPassport && p.passport?.number) return false;
+        if (filterOptions.missingAddress && p.address) return false;
+        if (filterOptions.missingDOB && p.dateOfBirth) return false;
+        return true;
+      })
+    : passengers.filter((p) => {
+        if (filterOptions.missingPassport && p.passport?.number) return false;
+        if (filterOptions.missingAddress && p.address) return false;
+        if (filterOptions.missingDOB && p.dateOfBirth) return false;
+        return true;
+      });
+
+  const handleFlightSelect = (flight) => {
+    dispatch(selectFlight(flight));
   };
 
-  const handleAddPassenger = () => {
-    dispatch(addPassenger({ ...newPassenger, id: Date.now(), services: newPassenger.services.split(', ') }));
-    setNewPassenger({ name: '', seat: '', services: '' });
-    handleClose();
+  const handleOpenPassengerDialog = (passenger = null) => {
+    if (passenger) {
+      setEditMode(true);
+      setPassengerForm(passenger);
+    } else {
+      setEditMode(false);
+      setPassengerForm({
+        id: `P${Date.now()}`,
+        name: '',
+        seat: '',
+        flightId: selectedFlight?.id || '',
+        passport: { number: '', expiryDate: '', country: '' },
+        address: '',
+        dateOfBirth: '',
+        ancillaryServices: [],
+        specialMeal: 'Regular',
+        wheelchair: false,
+        infant: false,
+        checkedIn: false,
+        bookingReference: `BK${Date.now()}`,
+        shopRequests: [],
+      });
+    }
+    setPassengerDialog(true);
+  };
+
+  const handleSavePassenger = () => {
+    if (editMode) {
+      dispatch(updatePassenger(passengerForm));
+    } else {
+      dispatch(addPassenger(passengerForm));
+    }
+    setPassengerDialog(false);
+  };
+
+  const handleDeletePassenger = (id) => {
+    if (window.confirm('Are you sure you want to delete this passenger?')) {
+      dispatch(deletePassenger(id));
+    }
+  };
+
+  const handleOpenServiceDialog = (service = null) => {
+    if (service) {
+      setEditingService(service);
+      setServiceForm(service);
+    } else {
+      setEditingService('');
+      setServiceForm('');
+    }
+    setServiceDialog(true);
+  };
+
+  const handleSaveService = () => {
+    if (editingService) {
+      dispatch(updateAncillaryService({ oldService: editingService, newService: serviceForm }));
+    } else {
+      dispatch(addAncillaryService(serviceForm));
+    }
+    setServiceDialog(false);
+  };
+
+  const handleDeleteService = (service) => {
+    if (window.confirm(`Delete "${service}"?`)) {
+      dispatch(deleteAncillaryService(service));
+    }
+  };
+
+  const handleOpenMealDialog = (meal = null) => {
+    if (meal) {
+      setEditingMeal(meal);
+      setMealForm(meal);
+    } else {
+      setEditingMeal('');
+      setMealForm('');
+    }
+    setMealDialog(true);
+  };
+
+  const handleSaveMeal = () => {
+    if (editingMeal) {
+      dispatch(updateMealOption({ oldMeal: editingMeal, newMeal: mealForm }));
+    } else {
+      dispatch(addMealOption(mealForm));
+    }
+    setMealDialog(false);
+  };
+
+  const handleDeleteMeal = (meal) => {
+    if (window.confirm(`Delete "${meal}"?`)) {
+      dispatch(deleteMealOption(meal));
+    }
+  };
+
+  const handleOpenShopItemDialog = (item = null) => {
+    if (item) {
+      setEditMode(true);
+      setShopItemForm(item);
+    } else {
+      setEditMode(false);
+      setShopItemForm({
+        id: `SHOP${Date.now()}`,
+        name: '',
+        category: 'Perfumes & Cosmetics',
+        price: 0,
+        currency: 'USD',
+      });
+    }
+    setShopItemDialog(true);
+  };
+
+  const handleSaveShopItem = () => {
+    if (editMode) {
+      dispatch(updateShopItem(shopItemForm));
+    } else {
+      dispatch(addShopItem(shopItemForm));
+    }
+    setShopItemDialog(false);
+  };
+
+  const handleDeleteShopItem = (id) => {
+    if (window.confirm('Delete this shop item?')) {
+      dispatch(deleteShopItem(id));
+    }
+  };
+
+  const hasMissingInfo = (passenger) => {
+    return !passenger.passport?.number || !passenger.address || !passenger.dateOfBirth;
   };
 
   return (
-    <Paper elevation={3} style={{ padding: '16px', margin: '16px' }}>
-      <Typography variant="h5">Admin Dashboard</Typography>
-      <Button variant="contained" color="primary" onClick={handleOpen} style={{ marginBottom: '10px' }}>Add Passenger</Button>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell>Seat</TableCell>
-            <TableCell>Ancillary Services</TableCell>
-            <TableCell>Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {passengers.map(passenger => (
-            <TableRow key={passenger.id}>
-              <TableCell>{passenger.name}</TableCell>
-              <TableCell>{passenger.seat}</TableCell>
-              <TableCell>{passenger.services.join(', ')}</TableCell>
-              <TableCell>
-                <Button color="primary" onClick={() => dispatch(updatePassenger(passenger))}>Edit</Button>
-                <Button color="secondary" onClick={() => dispatch(deletePassenger(passenger.id))}>Delete</Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <Container maxWidth="xl" sx={{ mt: 3, mb: 3 }}>
+      <Paper elevation={3} sx={{ p: 3 }}>
+        <Typography variant="h4" gutterBottom>
+          <SettingsIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+          Admin Dashboard
+        </Typography>
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Add Passenger</DialogTitle>
+        <Tabs value={activeTab} onChange={(e, v) => setActiveTab(v)} sx={{ mb: 3 }}>
+          <Tab label="Passengers" icon={<PersonIcon />} iconPosition="start" />
+          <Tab label="Services & Menu" icon={<SettingsIcon />} iconPosition="start" />
+        </Tabs>
+
+        {activeTab === 0 && (
+          <>
+            {/* Flight Selection & Filters */}
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Filter by Flight</InputLabel>
+                  <Select
+                    value={selectedFlight?.id || ''}
+                    label="Filter by Flight"
+                    onChange={(e) => {
+                      const flight = flights.find((f) => f.id === e.target.value);
+                      handleFlightSelect(flight || null);
+                    }}
+                  >
+                    <MenuItem value="">All Flights</MenuItem>
+                    {flights.map((flight) => (
+                      <MenuItem key={flight.id} value={flight.id}>
+                        {flight.name} - {flight.time}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <Typography variant="body2">Filter by missing:</Typography>
+                  <FormGroup row>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={filterOptions.missingPassport}
+                          onChange={(e) =>
+                            dispatch(setAdminFilter({ missingPassport: e.target.checked }))
+                          }
+                        />
+                      }
+                      label="Passport"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={filterOptions.missingAddress}
+                          onChange={(e) =>
+                            dispatch(setAdminFilter({ missingAddress: e.target.checked }))
+                          }
+                        />
+                      }
+                      label="Address"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={filterOptions.missingDOB}
+                          onChange={(e) =>
+                            dispatch(setAdminFilter({ missingDOB: e.target.checked }))
+                          }
+                        />
+                      }
+                      label="DOB"
+                    />
+                  </FormGroup>
+                  <Button size="small" onClick={() => dispatch(clearAdminFilters())}>
+                    Clear
+                  </Button>
+                </Box>
+              </Grid>
+            </Grid>
+
+            {/* Passenger List */}
+            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="h6">
+                Passengers ({filteredPassengers.length})
+              </Typography>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => handleOpenPassengerDialog()}
+              >
+                Add Passenger
+              </Button>
+            </Box>
+
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Flight</TableCell>
+                  <TableCell>Seat</TableCell>
+                  <TableCell>Ancillary Services</TableCell>
+                  <TableCell>Passport</TableCell>
+                  <TableCell>Address</TableCell>
+                  <TableCell>DOB</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredPassengers.map((passenger) => (
+                  <TableRow
+                    key={passenger.id}
+                    sx={{
+                      bgcolor: hasMissingInfo(passenger) ? '#fff3e0' : 'transparent',
+                    }}
+                  >
+                    <TableCell>
+                      {passenger.name}
+                      {hasMissingInfo(passenger) && (
+                        <Chip label="Incomplete" size="small" color="warning" sx={{ ml: 1 }} />
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {flights.find((f) => f.id === passenger.flightId)?.name || 'N/A'}
+                    </TableCell>
+                    <TableCell>{passenger.seat}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                        {passenger.ancillaryServices?.slice(0, 2).map((service) => (
+                          <Chip key={service} label={service} size="small" />
+                        ))}
+                        {passenger.ancillaryServices?.length > 2 && (
+                          <Chip label={`+${passenger.ancillaryServices.length - 2}`} size="small" />
+                        )}
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      {passenger.passport?.number ? (
+                        <Chip label="✓" color="success" size="small" />
+                      ) : (
+                        <Chip label="Missing" color="error" size="small" />
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {passenger.address ? (
+                        <Chip label="✓" color="success" size="small" />
+                      ) : (
+                        <Chip label="Missing" color="error" size="small" />
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {passenger.dateOfBirth ? (
+                        <Chip label="✓" color="success" size="small" />
+                      ) : (
+                        <Chip label="Missing" color="error" size="small" />
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() => handleOpenPassengerDialog(passenger)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleDeletePassenger(passenger.id)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </>
+        )}
+
+        {activeTab === 1 && (
+          <Grid container spacing={3}>
+            {/* Ancillary Services */}
+            <Grid item xs={12} md={4}>
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                  <Typography variant="h6">Ancillary Services</Typography>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<AddIcon />}
+                    onClick={() => handleOpenServiceDialog()}
+                  >
+                    Add
+                  </Button>
+                </Box>
+                <List>
+                  {ancillaryServices.map((service) => (
+                    <ListItem
+                      key={service}
+                      secondaryAction={
+                        <>
+                          <IconButton
+                            edge="end"
+                            size="small"
+                            onClick={() => handleOpenServiceDialog(service)}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton
+                            edge="end"
+                            size="small"
+                            onClick={() => handleDeleteService(service)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </>
+                      }
+                    >
+                      <ListItemText primary={service} />
+                    </ListItem>
+                  ))}
+                </List>
+              </Paper>
+            </Grid>
+
+            {/* Meal Options */}
+            <Grid item xs={12} md={4}>
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                  <Typography variant="h6">Meal Options</Typography>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<AddIcon />}
+                    onClick={() => handleOpenMealDialog()}
+                  >
+                    Add
+                  </Button>
+                </Box>
+                <List>
+                  {mealOptions.map((meal) => (
+                    <ListItem
+                      key={meal}
+                      secondaryAction={
+                        <>
+                          <IconButton
+                            edge="end"
+                            size="small"
+                            onClick={() => handleOpenMealDialog(meal)}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton
+                            edge="end"
+                            size="small"
+                            onClick={() => handleDeleteMeal(meal)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </>
+                      }
+                    >
+                      <ListItemText primary={meal} />
+                    </ListItem>
+                  ))}
+                </List>
+              </Paper>
+            </Grid>
+
+            {/* Shop Items */}
+            <Grid item xs={12} md={4}>
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                  <Typography variant="h6">Shop Items ({shopItems.length})</Typography>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<AddIcon />}
+                    onClick={() => handleOpenShopItemDialog()}
+                  >
+                    Add
+                  </Button>
+                </Box>
+                <List sx={{ maxHeight: 400, overflow: 'auto' }}>
+                  {shopItems.map((item) => (
+                    <ListItem
+                      key={item.id}
+                      secondaryAction={
+                        <>
+                          <IconButton
+                            edge="end"
+                            size="small"
+                            onClick={() => handleOpenShopItemDialog(item)}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton
+                            edge="end"
+                            size="small"
+                            onClick={() => handleDeleteShopItem(item.id)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </>
+                      }
+                    >
+                      <ListItemText
+                        primary={item.name}
+                        secondary={`${item.category} - $${item.price}`}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </Paper>
+            </Grid>
+          </Grid>
+        )}
+      </Paper>
+
+      {/* Passenger Dialog */}
+      <Dialog open={passengerDialog} onClose={() => setPassengerDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle>{editMode ? 'Edit Passenger' : 'Add Passenger'}</DialogTitle>
         <DialogContent>
-          <TextField margin="dense" label="Name" name="name" fullWidth value={newPassenger.name} onChange={handleChange} />
-          <TextField margin="dense" label="Seat" name="seat" fullWidth value={newPassenger.seat} onChange={handleChange} />
-          <TextField margin="dense" label="Ancillary Services (comma separated)" name="services" fullWidth value={newPassenger.services} onChange={handleChange} />
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Name"
+                value={passengerForm.name}
+                onChange={(e) => setPassengerForm({ ...passengerForm, name: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <TextField
+                fullWidth
+                label="Seat"
+                value={passengerForm.seat}
+                onChange={(e) => setPassengerForm({ ...passengerForm, seat: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <FormControl fullWidth>
+                <InputLabel>Flight</InputLabel>
+                <Select
+                  value={passengerForm.flightId}
+                  label="Flight"
+                  onChange={(e) => setPassengerForm({ ...passengerForm, flightId: e.target.value })}
+                >
+                  {flights.map((flight) => (
+                    <MenuItem key={flight.id} value={flight.id}>
+                      {flight.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Divider sx={{ my: 1 }}>
+                <Typography variant="caption">Passport Details</Typography>
+              </Divider>
+            </Grid>
+
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Passport Number"
+                value={passengerForm.passport.number}
+                onChange={(e) =>
+                  setPassengerForm({
+                    ...passengerForm,
+                    passport: { ...passengerForm.passport, number: e.target.value },
+                  })
+                }
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Expiry Date"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={passengerForm.passport.expiryDate}
+                onChange={(e) =>
+                  setPassengerForm({
+                    ...passengerForm,
+                    passport: { ...passengerForm.passport, expiryDate: e.target.value },
+                  })
+                }
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Country"
+                value={passengerForm.passport.country}
+                onChange={(e) =>
+                  setPassengerForm({
+                    ...passengerForm,
+                    passport: { ...passengerForm.passport, country: e.target.value },
+                  })
+                }
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Address"
+                multiline
+                rows={2}
+                value={passengerForm.address}
+                onChange={(e) => setPassengerForm({ ...passengerForm, address: e.target.value })}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Date of Birth"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={passengerForm.dateOfBirth}
+                onChange={(e) => setPassengerForm({ ...passengerForm, dateOfBirth: e.target.value })}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Booking Reference"
+                value={passengerForm.bookingReference}
+                onChange={(e) =>
+                  setPassengerForm({ ...passengerForm, bookingReference: e.target.value })
+                }
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <FormGroup row>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={passengerForm.wheelchair}
+                      onChange={(e) =>
+                        setPassengerForm({ ...passengerForm, wheelchair: e.target.checked })
+                      }
+                    />
+                  }
+                  label="Wheelchair"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={passengerForm.infant}
+                      onChange={(e) =>
+                        setPassengerForm({ ...passengerForm, infant: e.target.checked })
+                      }
+                    />
+                  }
+                  label="Infant"
+                />
+              </FormGroup>
+            </Grid>
+          </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="secondary">Cancel</Button>
-          <Button onClick={handleAddPassenger} color="primary">Add</Button>
+          <Button onClick={() => setPassengerDialog(false)}>Cancel</Button>
+          <Button onClick={handleSavePassenger} variant="contained">
+            {editMode ? 'Update' : 'Add'}
+          </Button>
         </DialogActions>
       </Dialog>
-    </Paper>
+
+      {/* Service Dialog */}
+      <Dialog open={serviceDialog} onClose={() => setServiceDialog(false)}>
+        <DialogTitle>{editingService ? 'Edit Service' : 'Add Service'}</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullWidth
+            label="Service Name"
+            value={serviceForm}
+            onChange={(e) => setServiceForm(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setServiceDialog(false)}>Cancel</Button>
+          <Button onClick={handleSaveService} variant="contained">
+            {editingService ? 'Update' : 'Add'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Meal Dialog */}
+      <Dialog open={mealDialog} onClose={() => setMealDialog(false)}>
+        <DialogTitle>{editingMeal ? 'Edit Meal' : 'Add Meal'}</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullWidth
+            label="Meal Name"
+            value={mealForm}
+            onChange={(e) => setMealForm(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setMealDialog(false)}>Cancel</Button>
+          <Button onClick={handleSaveMeal} variant="contained">
+            {editingMeal ? 'Update' : 'Add'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Shop Item Dialog */}
+      <Dialog open={shopItemDialog} onClose={() => setShopItemDialog(false)}>
+        <DialogTitle>{editMode ? 'Edit Shop Item' : 'Add Shop Item'}</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Item Name"
+                value={shopItemForm.name}
+                onChange={(e) => setShopItemForm({ ...shopItemForm, name: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel>Category</InputLabel>
+                <Select
+                  value={shopItemForm.category}
+                  label="Category"
+                  onChange={(e) => setShopItemForm({ ...shopItemForm, category: e.target.value })}
+                >
+                  <MenuItem value="Perfumes & Cosmetics">Perfumes & Cosmetics</MenuItem>
+                  <MenuItem value="Electronics">Electronics</MenuItem>
+                  <MenuItem value="Fashion & Accessories">Fashion & Accessories</MenuItem>
+                  <MenuItem value="Food & Beverages">Food & Beverages</MenuItem>
+                  <MenuItem value="Travel Essentials">Travel Essentials</MenuItem>
+                  <MenuItem value="Toys & Gifts">Toys & Gifts</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={8}>
+              <TextField
+                fullWidth
+                label="Price"
+                type="number"
+                value={shopItemForm.price}
+                onChange={(e) =>
+                  setShopItemForm({ ...shopItemForm, price: parseFloat(e.target.value) })
+                }
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                fullWidth
+                label="Currency"
+                value={shopItemForm.currency}
+                onChange={(e) => setShopItemForm({ ...shopItemForm, currency: e.target.value })}
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShopItemDialog(false)}>Cancel</Button>
+          <Button onClick={handleSaveShopItem} variant="contained">
+            {editMode ? 'Update' : 'Add'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
   );
 };
 
