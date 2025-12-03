@@ -232,7 +232,7 @@ A comprehensive **React + Redux** application for managing airline check-in, in-
 
 ### 1️⃣ Clone the Repository
 ```sh
-git clone https://github.com/your-repo/airline-management.git
+git clone https://github.com/KeerthiYeruva/casestudy-airline.git
 cd airline-management
 ```
 
