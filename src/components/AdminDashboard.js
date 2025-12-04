@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
+  selectFlight,
+  setAdminFilter,
+  clearAdminFilters,
+} from '../slices/adminSlice';
+import {
   addPassenger,
   updatePassenger,
   deletePassenger,
-  selectFlight,
   addAncillaryService,
   updateAncillaryService,
   deleteAncillaryService,
@@ -14,9 +18,7 @@ import {
   addShopItem,
   updateShopItem,
   deleteShopItem,
-  setAdminFilter,
-  clearAdminFilters,
-} from '../slices/adminSlice';
+} from '../slices/dataSlice';
 import { showToast } from '../slices/toastSlice';
 import SimpleInputDialog from './SimpleInputDialog';
 import ConfirmDialog from './ConfirmDialog';
@@ -62,8 +64,9 @@ import SettingsIcon from '@mui/icons-material/Settings';
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
-  const { flights, selectedFlight, passengers, ancillaryServices, mealOptions, shopItems, filterOptions } =
-    useSelector((state) => state.admin);
+  const { flights, passengers, ancillaryServices, mealOptions, shopItems } =
+    useSelector((state) => state.data);
+  const { selectedFlight, filterOptions } = useSelector((state) => state.admin);
 
   const [activeTab, setActiveTab] = useState(0);
   const [passengerDialog, setPassengerDialog] = useState(false);
@@ -188,10 +191,16 @@ const AdminDashboard = () => {
 
   const handleDeletePassenger = (id) => {
     const passenger = passengers.find(p => p.id === id);
-    if (window.confirm('Are you sure you want to delete this passenger?')) {
-      dispatch(deletePassenger(id));
-      dispatch(showToast({ message: `Passenger ${passenger?.name || id} deleted successfully`, severity: 'success' }));
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Delete Passenger',
+      message: `Are you sure you want to delete ${passenger?.name || 'this passenger'}?`,
+      severity: 'error',
+      onConfirm: () => {
+        dispatch(deletePassenger(id));
+        dispatch(showToast({ message: `Passenger ${passenger?.name || id} deleted successfully`, severity: 'success' }));
+      },
+    });
   };
 
   const handleOpenServiceDialog = (service = null) => {
@@ -310,10 +319,16 @@ const AdminDashboard = () => {
 
   const handleDeleteShopItem = (id) => {
     const item = shopItems.find(i => i.id === id);
-    if (window.confirm('Delete this shop item?')) {
-      dispatch(deleteShopItem(id));
-      dispatch(showToast({ message: `${item?.name || 'Item'} deleted successfully`, severity: 'success' }));
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Delete Shop Item',
+      message: `Are you sure you want to delete ${item?.name || 'this item'}?`,
+      severity: 'error',
+      onConfirm: () => {
+        dispatch(deleteShopItem(id));
+        dispatch(showToast({ message: `${item?.name || 'Item'} deleted successfully`, severity: 'success' }));
+      },
+    });
   };
 
   const hasMissingInfo = (passenger) => {

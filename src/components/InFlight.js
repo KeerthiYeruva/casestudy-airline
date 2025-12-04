@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { selectFlight } from '../slices/checkInSlice';
 import {
-  selectFlight,
-  addAncillaryService,
-  removeAncillaryService,
+  addAncillaryServiceToPassenger,
+  removeAncillaryServiceFromPassenger,
   changeMealPreference,
   addShopRequest,
   removeShopRequest,
   updateShopRequestQuantity,
-} from '../slices/checkInSlice';
+} from '../slices/dataSlice';
 import { showToast } from '../slices/toastSlice';
 import SeatMapVisual from './SeatMapVisual';
 import {
@@ -40,8 +40,9 @@ import '../styles/InFlight.scss';
 
 const InFlight = () => {
   const dispatch = useDispatch();
-  const { flights, selectedFlight, passengers, ancillaryServices, mealOptions, shopItems, shopCategories } =
-    useSelector((state) => state.checkIn);
+  const { flights, passengers, ancillaryServices, mealOptions, shopItems, shopCategories } =
+    useSelector((state) => state.data);
+  const { selectedFlight } = useSelector((state) => state.checkIn);
 
   const [selectedPassenger, setSelectedPassenger] = useState(null);
   const [addServiceDialog, setAddServiceDialog] = useState(false);
@@ -80,7 +81,7 @@ const InFlight = () => {
       return;
     }
     dispatch(
-      addAncillaryService({
+      addAncillaryServiceToPassenger({
         passengerId: selectedPassenger.id,
         service: selectedService,
       })
@@ -93,7 +94,7 @@ const InFlight = () => {
   const handleRemoveService = (service) => {
     if (selectedPassenger) {
       dispatch(
-        removeAncillaryService({
+        removeAncillaryServiceFromPassenger({
           passengerId: selectedPassenger.id,
           service: service,
         })

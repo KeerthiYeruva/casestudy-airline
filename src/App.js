@@ -3,6 +3,7 @@ import { Provider, useSelector } from 'react-redux';
 import store from './Store';
 import Auth from './components/Auth';
 import ToastNotification from './components/ToastNotification';
+import ErrorBoundary from './components/ErrorBoundary';
 import { 
   ThemeProvider, 
   createTheme, 
@@ -122,13 +123,15 @@ const MainApp = () => {
 
 const App = () => {
   return (
-    <Provider store={store}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <MainApp />
-        <ToastNotification />
-      </ThemeProvider>
-    </Provider>
+    <ErrorBoundary>
+      <Provider store={store}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <MainApp />
+          <ToastNotification />
+        </ThemeProvider>
+      </Provider>
+    </ErrorBoundary>
   );
 };
 

@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   selectFlight,
-  checkInPassenger,
-  undoCheckIn,
-  changeSeat,
   setFilter,
   clearFilters,
 } from '../slices/checkInSlice';
+import {
+  checkInPassenger,
+  undoCheckIn,
+  changeSeat,
+} from '../slices/dataSlice';
 import { showToast } from '../slices/toastSlice';
 import SeatMapVisual from './SeatMapVisual';
 import {
@@ -38,9 +40,8 @@ import '../styles/StaffCheckIn.scss';
 
 const StaffCheckIn = () => {
   const dispatch = useDispatch();
-  const { flights, selectedFlight, passengers, filterOptions } = useSelector(
-    (state) => state.checkIn
-  );
+  const { flights, passengers } = useSelector((state) => state.data);
+  const { selectedFlight, filterOptions } = useSelector((state) => state.checkIn);
 
   const [selectedPassenger, setSelectedPassenger] = useState(null);
   const [changeSeatDialog, setChangeSeatDialog] = useState(false);
