@@ -2,6 +2,7 @@ import React, { useState, lazy, Suspense } from 'react';
 import { Provider, useSelector } from 'react-redux';
 import store from './Store';
 import Auth from './components/Auth';
+import ToastNotification from './components/ToastNotification';
 import { 
   ThemeProvider, 
   createTheme, 
@@ -125,6 +126,7 @@ const App = () => {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <MainApp />
+        <ToastNotification />
       </ThemeProvider>
     </Provider>
   );

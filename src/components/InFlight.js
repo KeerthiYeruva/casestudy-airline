@@ -9,6 +9,8 @@ import {
   removeShopRequest,
   updateShopRequestQuantity,
 } from '../slices/checkInSlice';
+import { showToast } from '../slices/toastSlice';
+import SeatMapVisual from './SeatMapVisual';
 import {
   Container,
   Paper,
@@ -70,11 +72,11 @@ const InFlight = () => {
 
   const handleAddService = () => {
     if (!selectedPassenger) {
-      alert('Please select a passenger first');
+      dispatch(showToast({ message: 'Please select a passenger first', severity: 'warning' }));
       return;
     }
     if (!selectedService) {
-      alert('Please select a service');
+      dispatch(showToast({ message: 'Please select a service', severity: 'warning' }));
       return;
     }
     dispatch(
@@ -83,6 +85,7 @@ const InFlight = () => {
         service: selectedService,
       })
     );
+    dispatch(showToast({ message: `${selectedService} added for ${selectedPassenger.name}`, severity: 'success' }));
     setAddServiceDialog(false);
     setSelectedService('');
   };
@@ -95,16 +98,17 @@ const InFlight = () => {
           service: service,
         })
       );
+      dispatch(showToast({ message: `${service} removed`, severity: 'info' }));
     }
   };
 
   const handleChangeMeal = () => {
     if (!selectedPassenger) {
-      alert('Please select a passenger first');
+      dispatch(showToast({ message: 'Please select a passenger first', severity: 'warning' }));
       return;
     }
     if (!selectedMeal) {
-      alert('Please select a meal option');
+      dispatch(showToast({ message: 'Please select a meal option', severity: 'warning' }));
       return;
     }
     dispatch(
@@ -113,17 +117,18 @@ const InFlight = () => {
         meal: selectedMeal,
       })
     );
+    dispatch(showToast({ message: `Meal changed to ${selectedMeal} for ${selectedPassenger.name}`, severity: 'success' }));
     setChangeMealDialog(false);
     setSelectedMeal('');
   };
 
   const handleAddShopItem = () => {
     if (!selectedPassenger || !selectedShopItem) {
-      alert('Please select a passenger and shop item');
+      dispatch(showToast({ message: 'Please select a passenger and shop item', severity: 'warning' }));
       return;
     }
     if (!shopQuantity || shopQuantity <= 0) {
-      alert('Quantity must be at least 1');
+      dispatch(showToast({ message: 'Quantity must be at least 1', severity: 'warning' }));
       return;
     }
     dispatch(
@@ -134,6 +139,7 @@ const InFlight = () => {
         price: selectedShopItem.price,
       })
     );
+    dispatch(showToast({ message: `${selectedShopItem.name} (x${shopQuantity}) added to cart`, severity: 'success' }));
     setShopDialog(false);
     setSelectedShopItem(null);
     setShopQuantity(1);
@@ -147,6 +153,7 @@ const InFlight = () => {
           item: item,
         })
       );
+      dispatch(showToast({ message: `${item} removed from cart`, severity: 'info' }));
     }
   };
 
@@ -175,63 +182,13 @@ const InFlight = () => {
     }, 0);
   };
 
-  const getSeatColor = (seat) => {
-    const passenger = flightPassengers.find((p) => p.seat === seat);
-    if (!passenger) return 'available';
-    
-    // Color code based on special meal requirements
-    if (passenger.specialMeal && passenger.specialMeal !== 'Regular') {
-      return 'special-meal';
-    }
-    return 'regular';
-  };
-
   const renderSeatMap = () => {
-    const rows = 10;
-    const seatsPerRow = ['A', 'B', 'C', 'D', 'E', 'F'];
-
     return (
-      <Box className="seat-map inflight">
-        <Typography variant="h6" gutterBottom>
-          Seat Map
-        </Typography>
-        <Box className="legend">
-          <Chip label="Available" className="seat-chip available" size="small" />
-          <Chip label="Regular Meal" className="seat-chip regular" size="small" />
-          <Chip
-            label="Special Meal Required"
-            className="seat-chip special-meal"
-            size="small"
-          />
-        </Box>
-        <Box className="seats-container">
-          {Array.from({ length: rows }, (_, rowIndex) => (
-            <Box key={rowIndex} className="seat-row">
-              <Typography className="row-number">{rowIndex + 1}</Typography>
-              {seatsPerRow.map((seatLetter, seatIndex) => {
-                const seatNumber = `${rowIndex + 1}${seatLetter}`;
-                const seatColor = getSeatColor(seatNumber);
-                const passenger = flightPassengers.find((p) => p.seat === seatNumber);
-                
-                return (
-                  <React.Fragment key={seatNumber}>
-                    <Button
-                      className={`seat ${seatColor}`}
-                      onClick={() => handleSeatClick(seatNumber)}
-                      variant="outlined"
-                      size="small"
-                      disabled={!passenger}
-                    >
-                      {seatNumber}
-                    </Button>
-                    {seatIndex === 2 && <Box className="aisle" />}
-                  </React.Fragment>
-                );
-              })}
-            </Box>
-          ))}
-        </Box>
-      </Box>
+      <SeatMapVisual
+        passengers={flightPassengers}
+        onSeatClick={handleSeatClick}
+        mode="inflight"
+      />
     );
   };
 

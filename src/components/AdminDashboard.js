@@ -17,6 +17,10 @@ import {
   setAdminFilter,
   clearAdminFilters,
 } from '../slices/adminSlice';
+import { showToast } from '../slices/toastSlice';
+import SimpleInputDialog from './SimpleInputDialog';
+import ConfirmDialog from './ConfirmDialog';
+import { SHOP_CATEGORIES } from '../constants/appConstants';
 import {
   Container,
   Paper,
@@ -67,6 +71,7 @@ const AdminDashboard = () => {
   const [mealDialog, setMealDialog] = useState(false);
   const [shopItemDialog, setShopItemDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', onConfirm: () => {} });
 
   const [passengerForm, setPassengerForm] = useState({
     id: '',
@@ -159,29 +164,33 @@ const AdminDashboard = () => {
   const handleSavePassenger = () => {
     // Validate required fields
     if (!passengerForm.name || !passengerForm.name.trim()) {
-      alert('Passenger name is required');
+      dispatch(showToast({ message: 'Passenger name is required', severity: 'error' }));
       return;
     }
     if (!passengerForm.seat || !passengerForm.seat.trim()) {
-      alert('Seat number is required');
+      dispatch(showToast({ message: 'Seat number is required', severity: 'error' }));
       return;
     }
     if (!passengerForm.flightId) {
-      alert('Flight selection is required');
+      dispatch(showToast({ message: 'Flight selection is required', severity: 'error' }));
       return;
     }
     
     if (editMode) {
       dispatch(updatePassenger(passengerForm));
+      dispatch(showToast({ message: `Passenger ${passengerForm.name} updated successfully`, severity: 'success' }));
     } else {
       dispatch(addPassenger(passengerForm));
+      dispatch(showToast({ message: `Passenger ${passengerForm.name} added successfully`, severity: 'success' }));
     }
     setPassengerDialog(false);
   };
 
   const handleDeletePassenger = (id) => {
+    const passenger = passengers.find(p => p.id === id);
     if (window.confirm('Are you sure you want to delete this passenger?')) {
       dispatch(deletePassenger(id));
+      dispatch(showToast({ message: `Passenger ${passenger?.name || id} deleted successfully`, severity: 'success' }));
     }
   };
 
@@ -198,21 +207,30 @@ const AdminDashboard = () => {
 
   const handleSaveService = () => {
     if (!serviceForm || !serviceForm.trim()) {
-      alert('Service name cannot be empty');
+      dispatch(showToast({ message: 'Service name cannot be empty', severity: 'error' }));
       return;
     }
     if (editingService) {
       dispatch(updateAncillaryService({ oldService: editingService, newService: serviceForm.trim() }));
+      dispatch(showToast({ message: 'Service updated successfully', severity: 'success' }));
     } else {
       dispatch(addAncillaryService(serviceForm.trim()));
+      dispatch(showToast({ message: 'Service added successfully', severity: 'success' }));
     }
     setServiceDialog(false);
   };
 
   const handleDeleteService = (service) => {
-    if (window.confirm(`Delete "${service}"?`)) {
-      dispatch(deleteAncillaryService(service));
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Delete Service',
+      message: `Delete "${service}"?`,
+      severity: 'error',
+      onConfirm: () => {
+        dispatch(deleteAncillaryService(service));
+        dispatch(showToast({ message: 'Service deleted successfully', severity: 'success' }));
+      },
+    });
   };
 
   const handleOpenMealDialog = (meal = null) => {
@@ -228,21 +246,30 @@ const AdminDashboard = () => {
 
   const handleSaveMeal = () => {
     if (!mealForm || !mealForm.trim()) {
-      alert('Meal option name cannot be empty');
+      dispatch(showToast({ message: 'Meal option name cannot be empty', severity: 'error' }));
       return;
     }
     if (editingMeal) {
       dispatch(updateMealOption({ oldMeal: editingMeal, newMeal: mealForm.trim() }));
+      dispatch(showToast({ message: 'Meal option updated successfully', severity: 'success' }));
     } else {
       dispatch(addMealOption(mealForm.trim()));
+      dispatch(showToast({ message: 'Meal option added successfully', severity: 'success' }));
     }
     setMealDialog(false);
   };
 
   const handleDeleteMeal = (meal) => {
-    if (window.confirm(`Delete "${meal}"?`)) {
-      dispatch(deleteMealOption(meal));
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Delete Meal',
+      message: `Delete "${meal}"?`,
+      severity: 'error',
+      onConfirm: () => {
+        dispatch(deleteMealOption(meal));
+        dispatch(showToast({ message: 'Meal option deleted successfully', severity: 'success' }));
+      },
+    });
   };
 
   const handleOpenShopItemDialog = (item = null) => {
@@ -264,24 +291,28 @@ const AdminDashboard = () => {
 
   const handleSaveShopItem = () => {
     if (!shopItemForm.name || !shopItemForm.name.trim()) {
-      alert('Item name is required');
+      dispatch(showToast({ message: 'Item name is required', severity: 'error' }));
       return;
     }
     if (!shopItemForm.price || shopItemForm.price <= 0) {
-      alert('Item price must be greater than 0');
+      dispatch(showToast({ message: 'Item price must be greater than 0', severity: 'error' }));
       return;
     }
     if (editMode) {
       dispatch(updateShopItem(shopItemForm));
+      dispatch(showToast({ message: `${shopItemForm.name} updated successfully`, severity: 'success' }));
     } else {
       dispatch(addShopItem({ ...shopItemForm, id: `SHOP${Date.now()}` }));
+      dispatch(showToast({ message: `${shopItemForm.name} added successfully`, severity: 'success' }));
     }
     setShopItemDialog(false);
   };
 
   const handleDeleteShopItem = (id) => {
+    const item = shopItems.find(i => i.id === id);
     if (window.confirm('Delete this shop item?')) {
       dispatch(deleteShopItem(id));
+      dispatch(showToast({ message: `${item?.name || 'Item'} deleted successfully`, severity: 'success' }));
     }
   };
 
@@ -766,46 +797,28 @@ const AdminDashboard = () => {
       </Dialog>
 
       {/* Service Dialog */}
-      <Dialog open={serviceDialog} onClose={() => setServiceDialog(false)}>
-        <DialogTitle>{editingService ? 'Edit Service' : 'Add Service'}</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            fullWidth
-            label="Service Name"
-            value={serviceForm}
-            onChange={(e) => setServiceForm(e.target.value)}
-            sx={{ mt: 2 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setServiceDialog(false)}>Cancel</Button>
-          <Button onClick={handleSaveService} variant="contained">
-            {editingService ? 'Update' : 'Add'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <SimpleInputDialog
+        open={serviceDialog}
+        onClose={() => setServiceDialog(false)}
+        title={editingService ? 'Edit Service' : 'Add Service'}
+        label="Service Name"
+        value={serviceForm}
+        onChange={(e) => setServiceForm(e.target.value)}
+        onSave={handleSaveService}
+        editMode={!!editingService}
+      />
 
       {/* Meal Dialog */}
-      <Dialog open={mealDialog} onClose={() => setMealDialog(false)}>
-        <DialogTitle>{editingMeal ? 'Edit Meal' : 'Add Meal'}</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            fullWidth
-            label="Meal Name"
-            value={mealForm}
-            onChange={(e) => setMealForm(e.target.value)}
-            sx={{ mt: 2 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setMealDialog(false)}>Cancel</Button>
-          <Button onClick={handleSaveMeal} variant="contained">
-            {editingMeal ? 'Update' : 'Add'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <SimpleInputDialog
+        open={mealDialog}
+        onClose={() => setMealDialog(false)}
+        title={editingMeal ? 'Edit Meal' : 'Add Meal'}
+        label="Meal Name"
+        value={mealForm}
+        onChange={(e) => setMealForm(e.target.value)}
+        onSave={handleSaveMeal}
+        editMode={!!editingMeal}
+      />
 
       {/* Shop Item Dialog */}
       <Dialog open={shopItemDialog} onClose={() => setShopItemDialog(false)}>
@@ -828,12 +841,11 @@ const AdminDashboard = () => {
                   label="Category"
                   onChange={(e) => setShopItemForm({ ...shopItemForm, category: e.target.value })}
                 >
-                  <MenuItem value="Perfumes & Cosmetics">Perfumes & Cosmetics</MenuItem>
-                  <MenuItem value="Electronics">Electronics</MenuItem>
-                  <MenuItem value="Fashion & Accessories">Fashion & Accessories</MenuItem>
-                  <MenuItem value="Food & Beverages">Food & Beverages</MenuItem>
-                  <MenuItem value="Travel Essentials">Travel Essentials</MenuItem>
-                  <MenuItem value="Toys & Gifts">Toys & Gifts</MenuItem>
+                  {SHOP_CATEGORIES.map((category) => (
+                    <MenuItem key={category} value={category}>
+                      {category}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
@@ -865,6 +877,16 @@ const AdminDashboard = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onClose={() => setConfirmDialog({ ...confirmDialog, open: false })}
+        onConfirm={confirmDialog.onConfirm}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        severity={confirmDialog.severity}
+      />
     </Container>
   );
 };

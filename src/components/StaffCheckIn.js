@@ -8,6 +8,8 @@ import {
   setFilter,
   clearFilters,
 } from '../slices/checkInSlice';
+import { showToast } from '../slices/toastSlice';
+import SeatMapVisual from './SeatMapVisual';
 import {
   Container,
   Paper,
@@ -72,11 +74,15 @@ const StaffCheckIn = () => {
   };
 
   const handleCheckIn = (passengerId) => {
+    const passenger = passengers.find(p => p.id === passengerId);
     dispatch(checkInPassenger(passengerId));
+    dispatch(showToast({ message: `${passenger?.name || 'Passenger'} checked in successfully`, severity: 'success' }));
   };
 
   const handleUndoCheckIn = (passengerId) => {
+    const passenger = passengers.find(p => p.id === passengerId);
     dispatch(undoCheckIn(passengerId));
+    dispatch(showToast({ message: `Check-in cancelled for ${passenger?.name || 'passenger'}`, severity: 'info' }));
   };
 
   const handleSeatClick = (seat) => {
@@ -88,11 +94,12 @@ const StaffCheckIn = () => {
 
   const handleChangeSeat = () => {
     if (!newSeatNumber || !newSeatNumber.trim()) {
-      alert('Please enter a valid seat number');
+      dispatch(showToast({ message: 'Please enter a valid seat number', severity: 'error' }));
       return;
     }
     if (selectedPassenger && newSeatNumber) {
       dispatch(changeSeat({ passengerId: selectedPassenger.id, newSeat: newSeatNumber.trim() }));
+      dispatch(showToast({ message: `Seat changed to ${newSeatNumber.trim()} for ${selectedPassenger.name}`, severity: 'success' }));
       setChangeSeatDialog(false);
       setNewSeatNumber('');
     }
@@ -104,59 +111,6 @@ const StaffCheckIn = () => {
 
   const handleClearFilters = () => {
     dispatch(clearFilters());
-  };
-
-  const getSeatColor = (seat) => {
-    const passenger = flightPassengers.find((p) => p.seat === seat);
-    if (!passenger) return 'available';
-    if (passenger.wheelchair) return 'wheelchair';
-    if (passenger.infant) return 'infant';
-    if (passenger.checkedIn) return 'checked-in';
-    return 'not-checked-in';
-  };
-
-  const renderSeatMap = () => {
-    const rows = 10;
-    const seatsPerRow = ['A', 'B', 'C', 'D', 'E', 'F'];
-
-    return (
-      <Box className="seat-map">
-        <Typography variant="h6" gutterBottom>
-          Seat Map
-        </Typography>
-        <Box className="legend">
-          <Chip label="Available" className="seat-chip available" size="small" />
-          <Chip label="Checked In" className="seat-chip checked-in" size="small" />
-          <Chip label="Not Checked In" className="seat-chip not-checked-in" size="small" />
-          <Chip label="Wheelchair" className="seat-chip wheelchair" size="small" />
-          <Chip label="Infant" className="seat-chip infant" size="small" />
-        </Box>
-        <Box className="seats-container">
-          {Array.from({ length: rows }, (_, rowIndex) => (
-            <Box key={rowIndex} className="seat-row">
-              <Typography className="row-number">{rowIndex + 1}</Typography>
-              {seatsPerRow.map((seatLetter, seatIndex) => {
-                const seatNumber = `${rowIndex + 1}${seatLetter}`;
-                const seatColor = getSeatColor(seatNumber);
-                return (
-                  <React.Fragment key={seatNumber}>
-                    <Button
-                      className={`seat ${seatColor}`}
-                      onClick={() => handleSeatClick(seatNumber)}
-                      variant="outlined"
-                      size="small"
-                    >
-                      {seatNumber}
-                    </Button>
-                    {seatIndex === 2 && <Box className="aisle" />}
-                  </React.Fragment>
-                );
-              })}
-            </Box>
-          ))}
-        </Box>
-      </Box>
-    );
   };
 
   return (
@@ -305,7 +259,11 @@ const StaffCheckIn = () => {
                 {/* Seat Map */}
                 <Grid item xs={12} lg={7}>
                   <Paper elevation={3} sx={{ p: 2 }}>
-                    {renderSeatMap()}
+                    <SeatMapVisual
+                      passengers={flightPassengers}
+                      onSeatClick={handleSeatClick}
+                      mode="checkin"
+                    />
                   </Paper>
                 </Grid>
 
