@@ -120,7 +120,20 @@ const AdminDashboard = () => {
   const handleOpenPassengerDialog = (passenger = null) => {
     if (passenger) {
       setEditMode(true);
-      setPassengerForm(passenger);
+      // Ensure all fields have default values to prevent undefined errors
+      setPassengerForm({
+        ...passenger,
+        passport: passenger.passport || { number: '', expiryDate: '', country: '' },
+        address: passenger.address || '',
+        dateOfBirth: passenger.dateOfBirth || '',
+        ancillaryServices: passenger.ancillaryServices || [],
+        specialMeal: passenger.specialMeal || 'Regular',
+        wheelchair: passenger.wheelchair || false,
+        infant: passenger.infant || false,
+        checkedIn: passenger.checkedIn || false,
+        bookingReference: passenger.bookingReference || '',
+        shopRequests: passenger.shopRequests || [],
+      });
     } else {
       setEditMode(false);
       setPassengerForm({
@@ -144,6 +157,20 @@ const AdminDashboard = () => {
   };
 
   const handleSavePassenger = () => {
+    // Validate required fields
+    if (!passengerForm.name || !passengerForm.name.trim()) {
+      alert('Passenger name is required');
+      return;
+    }
+    if (!passengerForm.seat || !passengerForm.seat.trim()) {
+      alert('Seat number is required');
+      return;
+    }
+    if (!passengerForm.flightId) {
+      alert('Flight selection is required');
+      return;
+    }
+    
     if (editMode) {
       dispatch(updatePassenger(passengerForm));
     } else {
@@ -170,10 +197,14 @@ const AdminDashboard = () => {
   };
 
   const handleSaveService = () => {
+    if (!serviceForm || !serviceForm.trim()) {
+      alert('Service name cannot be empty');
+      return;
+    }
     if (editingService) {
-      dispatch(updateAncillaryService({ oldService: editingService, newService: serviceForm }));
+      dispatch(updateAncillaryService({ oldService: editingService, newService: serviceForm.trim() }));
     } else {
-      dispatch(addAncillaryService(serviceForm));
+      dispatch(addAncillaryService(serviceForm.trim()));
     }
     setServiceDialog(false);
   };
@@ -196,10 +227,14 @@ const AdminDashboard = () => {
   };
 
   const handleSaveMeal = () => {
+    if (!mealForm || !mealForm.trim()) {
+      alert('Meal option name cannot be empty');
+      return;
+    }
     if (editingMeal) {
-      dispatch(updateMealOption({ oldMeal: editingMeal, newMeal: mealForm }));
+      dispatch(updateMealOption({ oldMeal: editingMeal, newMeal: mealForm.trim() }));
     } else {
-      dispatch(addMealOption(mealForm));
+      dispatch(addMealOption(mealForm.trim()));
     }
     setMealDialog(false);
   };
@@ -228,10 +263,18 @@ const AdminDashboard = () => {
   };
 
   const handleSaveShopItem = () => {
+    if (!shopItemForm.name || !shopItemForm.name.trim()) {
+      alert('Item name is required');
+      return;
+    }
+    if (!shopItemForm.price || shopItemForm.price <= 0) {
+      alert('Item price must be greater than 0');
+      return;
+    }
     if (editMode) {
       dispatch(updateShopItem(shopItemForm));
     } else {
-      dispatch(addShopItem(shopItemForm));
+      dispatch(addShopItem({ ...shopItemForm, id: `SHOP${Date.now()}` }));
     }
     setShopItemDialog(false);
   };

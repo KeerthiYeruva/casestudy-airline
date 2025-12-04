@@ -108,7 +108,11 @@ export const passengers = [
     infant: false,
     ancillaryServices: ['Wheelchair Assistance'],
     specialMeal: 'Diabetic',
-    bookingReference: 'ABC127'
+    bookingReference: 'ABC127',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    shopRequests: []
   },
   { 
     id: 'P006', 
@@ -120,7 +124,11 @@ export const passengers = [
     infant: true,
     ancillaryServices: ['Infant Care Kit', 'Priority Boarding'],
     specialMeal: 'Regular',
-    bookingReference: 'ABC128'
+    bookingReference: 'ABC128',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    shopRequests: []
   },
   { 
     id: 'P007', 
@@ -132,7 +140,11 @@ export const passengers = [
     infant: false,
     ancillaryServices: ['Wi-Fi Access', 'Extra Baggage'],
     specialMeal: 'Kosher',
-    bookingReference: 'ABC129'
+    bookingReference: 'ABC129',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    shopRequests: []
   },
   { 
     id: 'P008', 
@@ -144,7 +156,11 @@ export const passengers = [
     infant: false,
     ancillaryServices: ['Priority Boarding'],
     specialMeal: 'Halal',
-    bookingReference: 'ABC130'
+    bookingReference: 'ABC130',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    shopRequests: []
   },
 
   // Flight FL002 passengers
@@ -158,7 +174,11 @@ export const passengers = [
     infant: true,
     ancillaryServices: ['Infant Care Kit', 'Extra Baggage'],
     specialMeal: 'Regular',
-    bookingReference: 'DEF201'
+    bookingReference: 'DEF201',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    shopRequests: []
   },
   { 
     id: 'P010', 
@@ -170,7 +190,11 @@ export const passengers = [
     infant: false,
     ancillaryServices: ['Wheelchair Assistance', 'Priority Boarding'],
     specialMeal: 'Vegetarian',
-    bookingReference: 'DEF202'
+    bookingReference: 'DEF202',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    shopRequests: []
   },
   { 
     id: 'P011', 
@@ -182,7 +206,11 @@ export const passengers = [
     infant: false,
     ancillaryServices: ['Wi-Fi Access', 'Extra Legroom'],
     specialMeal: 'Regular',
-    bookingReference: 'DEF203'
+    bookingReference: 'DEF203',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    shopRequests: []
   },
   { 
     id: 'P012', 
@@ -194,7 +222,11 @@ export const passengers = [
     infant: false,
     ancillaryServices: ['Extra Baggage'],
     specialMeal: 'Gluten-Free',
-    bookingReference: 'DEF204'
+    bookingReference: 'DEF204',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    shopRequests: []
   },
   { 
     id: 'P013', 
@@ -206,7 +238,11 @@ export const passengers = [
     infant: true,
     ancillaryServices: ['Infant Care Kit', 'Priority Boarding'],
     specialMeal: 'Regular',
-    bookingReference: 'DEF205'
+    bookingReference: 'DEF205',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    shopRequests: []
   },
   { 
     id: 'P014', 
@@ -218,7 +254,11 @@ export const passengers = [
     infant: false,
     ancillaryServices: ['Wheelchair Assistance'],
     specialMeal: 'Vegan',
-    bookingReference: 'DEF206'
+    bookingReference: 'DEF206',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    shopRequests: []
   },
 
   // Flight FL003 passengers
@@ -232,7 +272,11 @@ export const passengers = [
     infant: false,
     ancillaryServices: ['Priority Boarding', 'Wi-Fi Access'],
     specialMeal: 'Regular',
-    bookingReference: 'GHI301'
+    bookingReference: 'GHI301',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    shopRequests: []
   },
   { 
     id: 'P016', 
@@ -244,7 +288,11 @@ export const passengers = [
     infant: true,
     ancillaryServices: ['Infant Care Kit', 'Extra Baggage'],
     specialMeal: 'Regular',
-    bookingReference: 'GHI302'
+    bookingReference: 'GHI302',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    shopRequests: []
   },
   { 
     id: 'P017', 
@@ -256,7 +304,11 @@ export const passengers = [
     infant: false,
     ancillaryServices: ['Wheelchair Assistance', 'Priority Boarding'],
     specialMeal: 'Diabetic',
-    bookingReference: 'GHI303'
+    bookingReference: 'GHI303',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    shopRequests: []
   },
   { 
     id: 'P018', 
@@ -268,7 +320,11 @@ export const passengers = [
     infant: false,
     ancillaryServices: ['Extra Legroom'],
     specialMeal: 'Vegetarian',
-    bookingReference: 'GHI304'
+    bookingReference: 'GHI304',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    shopRequests: []
   },
   { 
     id: 'P019', 
@@ -280,7 +336,11 @@ export const passengers = [
     infant: false,
     ancillaryServices: ['Wi-Fi Access', 'Extra Baggage'],
     specialMeal: 'Kosher',
-    bookingReference: 'GHI305'
+    bookingReference: 'GHI305',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    shopRequests: []
   },
   { 
     id: 'P020', 
@@ -292,7 +352,11 @@ export const passengers = [
     infant: false,
     ancillaryServices: ['Priority Boarding'],
     specialMeal: 'Halal',
-    bookingReference: 'GHI306'
+    bookingReference: 'GHI306',
+    passport: { number: '', expiryDate: '', country: '' },
+    address: '',
+    dateOfBirth: '',
+    shopRequests: []
   },
 ];
 

@@ -87,8 +87,12 @@ const StaffCheckIn = () => {
   };
 
   const handleChangeSeat = () => {
+    if (!newSeatNumber || !newSeatNumber.trim()) {
+      alert('Please enter a valid seat number');
+      return;
+    }
     if (selectedPassenger && newSeatNumber) {
-      dispatch(changeSeat({ passengerId: selectedPassenger.id, newSeat: newSeatNumber }));
+      dispatch(changeSeat({ passengerId: selectedPassenger.id, newSeat: newSeatNumber.trim() }));
       setChangeSeatDialog(false);
       setNewSeatNumber('');
     }

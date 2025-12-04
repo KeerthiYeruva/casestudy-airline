@@ -69,16 +69,22 @@ const InFlight = () => {
   };
 
   const handleAddService = () => {
-    if (selectedPassenger && selectedService) {
-      dispatch(
-        addAncillaryService({
-          passengerId: selectedPassenger.id,
-          service: selectedService,
-        })
-      );
-      setAddServiceDialog(false);
-      setSelectedService('');
+    if (!selectedPassenger) {
+      alert('Please select a passenger first');
+      return;
     }
+    if (!selectedService) {
+      alert('Please select a service');
+      return;
+    }
+    dispatch(
+      addAncillaryService({
+        passengerId: selectedPassenger.id,
+        service: selectedService,
+      })
+    );
+    setAddServiceDialog(false);
+    setSelectedService('');
   };
 
   const handleRemoveService = (service) => {
@@ -93,32 +99,44 @@ const InFlight = () => {
   };
 
   const handleChangeMeal = () => {
-    if (selectedPassenger && selectedMeal) {
-      dispatch(
-        changeMealPreference({
-          passengerId: selectedPassenger.id,
-          meal: selectedMeal,
-        })
-      );
-      setChangeMealDialog(false);
-      setSelectedMeal('');
+    if (!selectedPassenger) {
+      alert('Please select a passenger first');
+      return;
     }
+    if (!selectedMeal) {
+      alert('Please select a meal option');
+      return;
+    }
+    dispatch(
+      changeMealPreference({
+        passengerId: selectedPassenger.id,
+        meal: selectedMeal,
+      })
+    );
+    setChangeMealDialog(false);
+    setSelectedMeal('');
   };
 
   const handleAddShopItem = () => {
-    if (selectedPassenger && selectedShopItem && shopQuantity > 0) {
-      dispatch(
-        addShopRequest({
-          passengerId: selectedPassenger.id,
-          item: selectedShopItem.name,
-          quantity: shopQuantity,
-          price: selectedShopItem.price,
-        })
-      );
-      setShopDialog(false);
-      setSelectedShopItem(null);
-      setShopQuantity(1);
+    if (!selectedPassenger || !selectedShopItem) {
+      alert('Please select a passenger and shop item');
+      return;
     }
+    if (!shopQuantity || shopQuantity <= 0) {
+      alert('Quantity must be at least 1');
+      return;
+    }
+    dispatch(
+      addShopRequest({
+        passengerId: selectedPassenger.id,
+        item: selectedShopItem.name,
+        quantity: shopQuantity,
+        price: selectedShopItem.price,
+      })
+    );
+    setShopDialog(false);
+    setSelectedShopItem(null);
+    setShopQuantity(1);
   };
 
   const handleRemoveShopItem = (item) => {
@@ -150,7 +168,11 @@ const InFlight = () => {
 
   const calculateShopTotal = (shopRequests) => {
     if (!shopRequests || shopRequests.length === 0) return 0;
-    return shopRequests.reduce((total, request) => total + (request.price * request.quantity), 0);
+    return shopRequests.reduce((total, request) => {
+      const price = Number(request.price) || 0;
+      const quantity = Number(request.quantity) || 0;
+      return total + (price * quantity);
+    }, 0);
   };
 
   const getSeatColor = (seat) => {
@@ -453,7 +475,7 @@ const InFlight = () => {
                               Add Service
                             </Button>
                           </Box>
-                          {selectedPassenger.ancillaryServices.length > 0 ? (
+                          {selectedPassenger.ancillaryServices?.length > 0 ? (
                             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                               {selectedPassenger.ancillaryServices.map((service) => (
                                 <Chip
